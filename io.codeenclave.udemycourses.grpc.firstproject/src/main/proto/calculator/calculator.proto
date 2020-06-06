@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package calculator;
+
+option java_package = "io.codeenclave.udemycourses.grpc.firstproject.proto.calculator";
+option java_multiple_files = true;
+
+
+enum ArithmeticBinaryOperator {
+    UNKNOWN_BINARY_OPERATOR = 0;
+    ADD = 1;
+    MULTIPLY = 2;
+    DIVIDE = 3;
+    SUBTRACT = 4;
+
+}
+
+message IntArithmeticOperation {
+    int32 op1 = 1;
+    int32 op2 = 2;
+    ArithmeticBinaryOperator op = 3;
+}
+
+
+message IntArithmeticRequest {
+    IntArithmeticOperation intOperation = 1;
+}
+
+enum ArithmeticErrorCode {
+    UNKNOWN_ERROR_CODE = 0;
+    NaN = 1;
+}
+
+message IntArithmeticResponse {
+    oneof guarded_result {
+        int32 result = 1;
+        ArithmeticErrorCode errorCode = 2;
+    }
+}
+
+service IntArithmeticService {
+    rpc ArithmeticOperation(IntArithmeticRequest) returns (IntArithmeticResponse) {};
+}
