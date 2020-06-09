@@ -1,0 +1,18 @@
+syntax="proto3";
+
+package primenumberdecomposition;
+
+option java_package = "io.codeenclave.udemycourses.grpc.firstproject.proto.primenumberdecomposition";
+option java_multiple_files = true;
+
+message PrimeNumberDecompositionStreamRequest {
+    int32 primeNumber = 1;
+}
+
+message PrimeNumberDecompositionStreamResponse {
+    int32 result = 1;
+}
+
+service PrimeNumberDecompositionStreamService {
+    rpc getPrimeNumberDecomposition(PrimeNumberDecompositionStreamRequest) returns (stream PrimeNumberDecompositionStreamResponse) {};
+}

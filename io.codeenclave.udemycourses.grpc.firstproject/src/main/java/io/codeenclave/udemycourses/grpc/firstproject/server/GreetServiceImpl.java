@@ -1,9 +1,6 @@
 package io.codeenclave.udemycourses.grpc.firstproject.server;
 
-import io.codeenclave.udemycourses.grpc.firstproject.proto.greet.GreetRequest;
-import io.codeenclave.udemycourses.grpc.firstproject.proto.greet.GreetResponse;
-import io.codeenclave.udemycourses.grpc.firstproject.proto.greet.GreetServiceGrpc;
-import io.codeenclave.udemycourses.grpc.firstproject.proto.greet.Greeting;
+import io.codeenclave.udemycourses.grpc.firstproject.proto.greet.*;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,5 +25,29 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
 
         // complete the RPC call
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void greetManyTimes(GreetManyTimesRequest request, StreamObserver<GreetManyTimesResponse> responseObserver) {
+        String firstName = request.getGreeting().getFirstName();
+
+        try {
+            for (int i = 0; i < 10; i++) {
+                String result = "Hello " + firstName + ", response number: " + i;
+
+                GreetManyTimesResponse response = GreetManyTimesResponse.newBuilder()
+                        .setResult(result)
+                        .build();
+
+                responseObserver.onNext(response);
+                Thread.sleep(1000L);
+            }
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        finally {
+            responseObserver.onCompleted();
+        }
     }
 }
