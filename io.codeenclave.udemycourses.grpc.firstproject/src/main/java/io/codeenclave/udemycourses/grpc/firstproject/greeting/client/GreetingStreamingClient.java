@@ -1,4 +1,4 @@
-package io.codeenclave.udemycourses.grpc.firstproject.client;
+package io.codeenclave.udemycourses.grpc.firstproject.greeting.client;
 
 import io.codeenclave.udemycourses.grpc.firstproject.proto.greet.*;
 import io.grpc.ManagedChannel;

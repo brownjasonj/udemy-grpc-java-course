@@ -1,4 +1,4 @@
-package io.codeenclave.udemycourses.grpc.firstproject.server;
+package io.codeenclave.udemycourses.grpc.firstproject.calculator.server;
 
 import io.codeenclave.udemycourses.grpc.firstproject.proto.calculator.*;
 import io.grpc.stub.StreamObserver;
@@ -94,5 +94,32 @@ public class IntCalculatorServiceImpl extends IntArithmeticServiceGrpc.IntArithm
         };
 
         return streamObserver;
+    }
+
+    @Override
+    public StreamObserver<IntFindMaximumRequest> findMaximum(StreamObserver<IntFindMaximumResponse> responseObserver) {
+        StreamObserver<IntFindMaximumRequest> requestObserver = new StreamObserver<IntFindMaximumRequest>() {
+            Integer max = 0;
+            @Override
+            public void onNext(IntFindMaximumRequest value) {
+                if (value.getValue() > max) {
+                    max = value.getValue();
+                    responseObserver.onNext(IntFindMaximumResponse.newBuilder()
+                            .setValue(max)
+                            .build());
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onCompleted();
+            }
+        };
+        return requestObserver;
     }
 }

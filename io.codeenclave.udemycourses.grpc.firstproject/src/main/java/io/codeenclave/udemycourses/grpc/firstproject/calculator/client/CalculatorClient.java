@@ -1,4 +1,4 @@
-package io.codeenclave.udemycourses.grpc.firstproject.client;
+package io.codeenclave.udemycourses.grpc.firstproject.calculator.client;
 
 import io.codeenclave.udemycourses.grpc.firstproject.proto.calculator.*;
 import io.grpc.ManagedChannel;
@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -29,7 +28,8 @@ public class CalculatorClient {
                 .build();
 
         // doUnaryCall(channel);
-        doStreamingCall(channel);
+        // doStreamingCall(channel);
+        doBiDiStreaming(channel);
 
         logger.info("Shutting down channel");
         channel.shutdown();
@@ -99,7 +99,44 @@ public class CalculatorClient {
         } catch (InterruptedException e) {
             logger.error(e.getMessage());
         }
+    }
 
+    public void doBiDiStreaming(ManagedChannel channel) {
+        IntArithmeticServiceGrpc.IntArithmeticServiceStub asyncClient = IntArithmeticServiceGrpc.newStub(channel);
+        CountDownLatch latch = new CountDownLatch(1);
+        ArrayList<Integer> numbers = new ArrayList<Integer>(
+                Arrays.asList(10,20,30,40,50,60,71,80,90,91));
 
+        StreamObserver<IntFindMaximumRequest> requestObserver = asyncClient.findMaximum(new StreamObserver<IntFindMaximumResponse>() {
+            @Override
+            public void onNext(IntFindMaximumResponse value) {
+                logger.info("Maximum : " + value.getValue());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onCompleted() {
+                latch.countDown();
+            }
+        });
+
+        for(int i = 0; i < numbers.size(); i++) {
+            logger.info("Sending integer " + numbers.get(i));
+            requestObserver.onNext(IntFindMaximumRequest.newBuilder()
+                    .setValue(numbers.get(i))
+                    .build());
+        }
+
+        requestObserver.onCompleted();
+
+        try {
+            latch.await(3L, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage());
+        }
     }
 }

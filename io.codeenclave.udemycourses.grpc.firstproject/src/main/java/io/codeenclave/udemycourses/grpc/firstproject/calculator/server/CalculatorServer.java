@@ -1,4 +1,4 @@
-package io.codeenclave.udemycourses.grpc.firstproject.server;
+package io.codeenclave.udemycourses.grpc.firstproject.calculator.server;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -7,16 +7,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class PrimeNumberDecompositionServer {
-    private static final Logger logger = LoggerFactory.getLogger(PrimeNumberDecompositionServer.class);
+public class CalculatorServer {
+    private static final Logger logger = LoggerFactory.getLogger(CalculatorServer.class);
 
-
-    public static void main(String[] args) throws IOException, InterruptedException {
-
+    public static void main(String[] args) throws InterruptedException, IOException {
         logger.info("Hello gRPC");
 
-        Server server = ServerBuilder.forPort(50053)
-                .addService(new PrimeNumberDecompositionServiceImpl())
+        Server server = ServerBuilder.forPort(50052)
+                .addService(new IntCalculatorServiceImpl())
                 .build();
 
         server.start();

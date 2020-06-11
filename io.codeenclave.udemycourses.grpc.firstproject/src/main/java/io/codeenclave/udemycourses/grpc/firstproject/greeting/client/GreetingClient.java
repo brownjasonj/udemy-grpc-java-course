@@ -1,6 +1,5 @@
-package io.codeenclave.udemycourses.grpc.firstproject.client;
+package io.codeenclave.udemycourses.grpc.firstproject.greeting.client;
 
-import io.codeenclave.udemycourses.grpc.firstproject.proto.dummy.DummyServiceGrpc;
 import io.codeenclave.udemycourses.grpc.firstproject.proto.greet.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -8,6 +7,7 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +28,8 @@ public class GreetingClient {
 
         //doUnaryCall(channel);
         //doStreamingCall(channel);
-        doClientStreamingCall(channel);
+        // doClientStreamingCall(channel);
+        doBiDiStreaming(channel);
         logger.info("Shutting down channel");
         channel.shutdown();
     }
@@ -133,6 +134,46 @@ public class GreetingClient {
                         .setFirstName("Mark")
                         .build())
                 .build());
+
+        requestObserver.onCompleted();
+
+        try {
+            latch.await(3L, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage());
+        }
+    }
+
+    public void doBiDiStreaming(ManagedChannel channel) {
+        // create
+        GreetServiceGrpc.GreetServiceStub asyncClient = GreetServiceGrpc.newStub(channel);
+        CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<GreetEveryoneRequest> requestObserver = asyncClient.greetEveryone(new StreamObserver<GreetEveryoneResponse>() {
+            @Override
+            public void onNext(GreetEveryoneResponse value) {
+                logger.info("Response from server: " + value.getResult());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onCompleted() {
+                logger.info("The server is done sending data");
+                latch.countDown();
+            }
+        });
+
+        Arrays.asList("Stephan", "John", "Marc", "Patricia").forEach(
+                name -> requestObserver.onNext(GreetEveryoneRequest.newBuilder()
+                        .setGreeting(Greeting.newBuilder()
+                                .setFirstName(name)
+                                .build())
+                        .build())
+        );
 
         requestObserver.onCompleted();
 

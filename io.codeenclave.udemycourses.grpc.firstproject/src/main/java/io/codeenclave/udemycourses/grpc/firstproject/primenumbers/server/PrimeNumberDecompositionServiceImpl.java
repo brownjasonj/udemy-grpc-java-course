@@ -1,4 +1,4 @@
-package io.codeenclave.udemycourses.grpc.firstproject.server;
+package io.codeenclave.udemycourses.grpc.firstproject.primenumbers.server;
 
 import io.codeenclave.udemycourses.grpc.firstproject.proto.primenumberdecomposition.PrimeNumberDecompositionStreamRequest;
 import io.codeenclave.udemycourses.grpc.firstproject.proto.primenumberdecomposition.PrimeNumberDecompositionStreamResponse;

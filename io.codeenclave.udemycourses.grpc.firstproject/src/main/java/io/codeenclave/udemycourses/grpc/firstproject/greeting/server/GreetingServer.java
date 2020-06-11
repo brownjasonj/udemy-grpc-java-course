@@ -1,4 +1,4 @@
-package io.codeenclave.udemycourses.grpc.firstproject.server;
+package io.codeenclave.udemycourses.grpc.firstproject.greeting.server;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;

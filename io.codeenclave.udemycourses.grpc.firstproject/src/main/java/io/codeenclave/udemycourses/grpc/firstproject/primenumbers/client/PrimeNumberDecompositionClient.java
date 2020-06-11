@@ -1,7 +1,6 @@
-package io.codeenclave.udemycourses.grpc.firstproject.client;
+package io.codeenclave.udemycourses.grpc.firstproject.primenumbers.client;
 
 import io.codeenclave.udemycourses.grpc.firstproject.proto.primenumberdecomposition.PrimeNumberDecompositionStreamRequest;
-import io.codeenclave.udemycourses.grpc.firstproject.proto.primenumberdecomposition.PrimeNumberDecompositionStreamResponse;
 import io.codeenclave.udemycourses.grpc.firstproject.proto.primenumberdecomposition.PrimeNumberDecompositionStreamServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;

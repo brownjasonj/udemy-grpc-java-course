@@ -46,10 +46,21 @@ message FloatAverageResponse {
     float value = 1;
 }
 
+message IntFindMaximumRequest {
+    int32 value = 1;
+}
+
+message IntFindMaximumResponse {
+    int32 value = 1;
+}
+
 service IntArithmeticService {
     // returns the result of applying the arithmetic operator on the given numbers
     rpc ArithmeticOperation(IntArithmeticRequest) returns (IntArithmeticResponse) {};
 
     // calculates the average of a stream of integers
     rpc IntCalculateAverage(stream IntAverageRequest) returns (FloatAverageResponse) {};
+
+    // return current maximum of a stream of numbers
+    rpc FindMaximum(stream IntFindMaximumRequest) returns (stream IntFindMaximumResponse) {};
 }
