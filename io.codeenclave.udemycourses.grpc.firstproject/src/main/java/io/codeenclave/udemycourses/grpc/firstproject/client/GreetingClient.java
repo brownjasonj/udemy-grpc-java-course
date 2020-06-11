@@ -1,34 +1,41 @@
 package io.codeenclave.udemycourses.grpc.firstproject.client;
 
 import io.codeenclave.udemycourses.grpc.firstproject.proto.dummy.DummyServiceGrpc;
-import io.codeenclave.udemycourses.grpc.firstproject.proto.greet.GreetRequest;
-import io.codeenclave.udemycourses.grpc.firstproject.proto.greet.GreetResponse;
-import io.codeenclave.udemycourses.grpc.firstproject.proto.greet.GreetServiceGrpc;
-import io.codeenclave.udemycourses.grpc.firstproject.proto.greet.Greeting;
+import io.codeenclave.udemycourses.grpc.firstproject.proto.greet.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class GreetingClient {
     private static final Logger logger = LoggerFactory.getLogger(GreetingClient.class);
 
-
     public static void main(String[] args) {
-        logger.info("Hello I'm a gRPC client");
+        GreetingClient greetingClient = new GreetingClient();
+        greetingClient.run();
+    }
 
+
+    public void run() {
         logger.info("Creating channel");
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 50051)
                 .usePlaintext()
                 .build();
 
+        //doUnaryCall(channel);
+        //doStreamingCall(channel);
+        doClientStreamingCall(channel);
+        logger.info("Shutting down channel");
+        channel.shutdown();
+    }
+
+    public void doUnaryCall(ManagedChannel channel) {
         // create a synchronous client
         logger.info("Creating client stub");
-
-        // DummyServiceGrpc.DummyServiceBlockingStub syncClient = DummyServiceGrpc.newBlockingStub(channel);
-
-        // create an asynchronous client
-        // DummyServiceGrpc.DummyServiceFutureStub aSyncClient = DummyServiceGrpc.newFutureStub(channel);
 
         // created a greet service client (blocking - synchronous)
         GreetServiceGrpc.GreetServiceBlockingStub greetClient = GreetServiceGrpc.newBlockingStub(channel);
@@ -50,7 +57,89 @@ public class GreetingClient {
         // do something with the client
         logger.info(response.getResult());
 
-        logger.info("Shutting down channel");
-        channel.shutdown();
+    }
+
+    public void doStreamingCall(ManagedChannel channel) {
+        // create a synchronous client
+        logger.info("Creating client stub");
+        // created a greet service client (blocking - synchronous)
+        GreetServiceGrpc.GreetServiceBlockingStub greetClient = GreetServiceGrpc.newBlockingStub(channel);
+
+        // create a protocol buffer Greeting message
+        Greeting greeting = Greeting.newBuilder()
+                .setFirstName("Jason")
+                .setLastName("Brown")
+                .build();
+
+        // create a protocol buffer GreetManyTimesRequest message
+        GreetManyTimesRequest greetManyTimesRequest = GreetManyTimesRequest.newBuilder()
+                .setGreeting(greeting)
+                .build();
+
+        // call the RPC streaming interface
+        greetClient.greetManyTimes(greetManyTimesRequest)
+                .forEachRemaining(greetManyTimesResponse -> {
+                    logger.info(greetManyTimesResponse.getResult());
+                });
+    }
+
+    public void doClientStreamingCall(ManagedChannel channel) {
+        // create
+        GreetServiceGrpc.GreetServiceStub asyncClient = GreetServiceGrpc.newStub(channel);
+        CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<LongGreetRequest> requestObserver = asyncClient.longGreet(new StreamObserver<LongGreetResponse>() {
+            @Override
+            public void onNext(LongGreetResponse value) {
+                // we get a response from the server
+                logger.info("Received a response from the server");
+                logger.info(value.getResult());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                // we get an error from the server
+            }
+
+            @Override
+            public void onCompleted() {
+                // the server is done sending us data
+                // onCompleted will be called right after onNext
+                logger.info("Server has completed sending us something");
+                latch.countDown();
+            }
+        });
+
+        // streaming message #1
+        logger.info("Sending message 1");
+        requestObserver.onNext(LongGreetRequest.newBuilder()
+                .setGreeting(Greeting.newBuilder()
+                        .setFirstName("Stephane")
+                        .build())
+                .build());
+
+        // streaming message #2
+        logger.info("Sending message 2");
+        requestObserver.onNext(LongGreetRequest.newBuilder()
+                .setGreeting(Greeting.newBuilder()
+                        .setFirstName("John")
+                        .build())
+                .build());
+
+        // streaming message #3
+        logger.info("Sending message 3");
+        requestObserver.onNext(LongGreetRequest.newBuilder()
+                .setGreeting(Greeting.newBuilder()
+                        .setFirstName("Mark")
+                        .build())
+                .build());
+
+        requestObserver.onCompleted();
+
+        try {
+            latch.await(3L, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage());
+        }
     }
 }

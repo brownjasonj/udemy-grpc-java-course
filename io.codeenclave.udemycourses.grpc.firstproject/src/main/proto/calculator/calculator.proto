@@ -38,6 +38,18 @@ message IntArithmeticResponse {
     }
 }
 
+message IntAverageRequest {
+    int32 value = 1;
+}
+
+message FloatAverageResponse {
+    float value = 1;
+}
+
 service IntArithmeticService {
+    // returns the result of applying the arithmetic operator on the given numbers
     rpc ArithmeticOperation(IntArithmeticRequest) returns (IntArithmeticResponse) {};
+
+    // calculates the average of a stream of integers
+    rpc IntCalculateAverage(stream IntAverageRequest) returns (FloatAverageResponse) {};
 }

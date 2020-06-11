@@ -7,14 +7,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class ArithmeticServer {
-    private static final Logger logger = LoggerFactory.getLogger(ArithmeticServer.class);
+public class CalculatorServer {
+    private static final Logger logger = LoggerFactory.getLogger(CalculatorServer.class);
 
     public static void main(String[] args) throws InterruptedException, IOException {
         logger.info("Hello gRPC");
 
         Server server = ServerBuilder.forPort(50052)
-                .addService(new IntArithmeticServiceImpl())
+                .addService(new IntCalculatorServiceImpl())
                 .build();
 
         server.start();
